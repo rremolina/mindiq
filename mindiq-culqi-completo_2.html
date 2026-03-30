@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MindIQ — Descubre tu Inteligencia</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<!-- ══════════════════════════════════════
+  CULQI CHECKOUT v4 — Pasarela de pago
+  INSTRUCCIONES:
+  1. Regístrate en https://culqi.com
+  2. Ve a CulqiPanel > Desarrollo > API Keys
+  3. Reemplaza CULQI_PUBLIC_KEY con tu llave pública (empieza con pk_live_...)
+  4. En tu servidor backend, usa tu llave privada (sk_live_...) para crear el cargo
+  5. Para pruebas usa pk_test_... y sk_test_...
+══════════════════════════════════════ -->
+<script src="https://checkout.culqi.com/js/v4"></script>
+
+<style>
+/* ═══════════ RESET & VARIABLES ═══════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0b0c10; --bg2: #13141a; --bg3: #1c1e27; --bg4: #242631;
+  --bdr: rgba(255,255,255,0.07); --bdr2: rgba(255,255,255,0.14);
+  --txt: #f0f0f5; --txt2: #9090a8; --txt3: #55556a;
+  --gold: #f5c842; --gold2: #d4a800;
+  --teal: #00d4b4; --teal2: #009e88;
+  --purple: #8b6fff; --purple2: #6040d0;
+  --coral: #ff6b6b; --green: #3cdc8c;
+  --r: 14px; --r2: 22px;
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif;
+  --display: 'Clash Display', 'Plus Jakarta Sans', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+}
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body { font-family: var(--font); background: var(--bg); color: var(--txt); min-height: 100vh; overflow-x: hidden; }
+
+/* ═══════════ ANIMATED BG ═══════════ */
+#bg-layer { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.bg-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px); background-size: 56px 56px; }
+.orb { position: absolute; border-radius: 50%; filter: blur(90px); opacity: 0.16; animation: orbf linear infinite; }
+.orb1 { width: 560px; height: 560px; background: var(--purple); top: -180px; right: -120px; animation-duration: 18s; }
+.orb2 { width: 480px; height: 480px; background: var(--teal); bottom: -80px; left: -100px; animation-duration: 24s; animation-direction: reverse; }
+.orb3 { width: 320px; height: 320px; background: var(--gold); top: 45%; left: 35%; animation-duration: 30s; }
+@keyframes orbf { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-50px,40px)} }
+
+/* ═══════════ WRAPPER ═══════════ */
+#app { position: relative; z-index: 1; max-width: 460px; margin: 0 auto; padding-bottom: 48px; }
+
+/* ═══════════ SCREENS ═══════════ */
+.scr { display: none; }
+.scr.on { display: block; animation: scrin .4s cubic-bezier(.22,1,.36,1); }
+@keyframes scrin { from{opacity:0;transform:translateY(20px) scale(.98)} to{opacity:1;transform:none} }
+
+/* ═══════════ TOP BAR ═══════════ */
+.topbar { display: flex; align-items: center; justify-content: space-between; padding: 20px 22px 0; }
+.logo { font-family: var(--display); font-size: 22px; font-weight: 700; letter-spacing: -0.5px; }
+.logo-g { background: linear-gradient(135deg, var(--gold), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.vtag { font-size: 10px; font-weight: 700; color: var(--gold); background: rgba(245,200,66,.12); padding: 3px 10px; border-radius: 20px; border: 1px solid rgba(245,200,66,.22); letter-spacing: .05em; }
+
+/* ═══════════ HERO ═══════════ */
+.hero { padding: 36px 22px 0; text-align: center; }
+.hbadge { display: inline-flex; align-items: center; gap: 7px; background: rgba(139,111,255,.14); border: 1px solid rgba(139,111,255,.3); border-radius: 100px; padding: 5px 15px; font-size: 11px; font-weight: 700; color: #b5a0ff; letter-spacing: .06em; margin-bottom: 22px; }
+.bdot { width: 6px; height: 6px; border-radius: 50%; background: #b5a0ff; animation: bp 1.8s ease-in-out infinite; }
+@keyframes bp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.7);opacity:.4} }
+.htitle { font-family: var(--display); font-size: 42px; font-weight: 700; line-height: 1.05; letter-spacing: -1.5px; margin-bottom: 14px; }
+.ht1 { display: block; color: var(--txt); }
+.ht2 { display: block; background: linear-gradient(90deg, var(--gold), #ff9f43, var(--coral)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hsub { font-size: 14px; color: var(--txt2); line-height: 1.65; max-width: 320px; margin: 0 auto 30px; }
+
+/* Brain animation */
+.brain-wrap { width: 150px; height: 150px; margin: 0 auto 28px; position: relative; display: flex; align-items: center; justify-content: center; }
+.br { position: absolute; border-radius: 50%; border: 1px solid; animation: rotr linear infinite; }
+.br1 { width: 150px; height: 150px; border-color: rgba(139,111,255,.2); animation-duration: 26s; }
+.br2 { width: 110px; height: 110px; border-color: rgba(0,212,180,.18); animation-duration: 17s; animation-direction: reverse; border-style: dashed; }
+.br3 { width: 76px; height: 76px; border-color: rgba(245,200,66,.18); animation-duration: 12s; }
+@keyframes rotr { to{transform:rotate(360deg)} }
+.bcore { width: 62px; height: 62px; border-radius: 50%; background: linear-gradient(135deg,rgba(139,111,255,.25),rgba(0,212,180,.25)); border: 1px solid rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+
+/* Stats */
+.stats { display: flex; gap: 8px; padding: 0 22px; margin-bottom: 20px; }
+.scard { flex: 1; background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r); padding: 12px 8px; text-align: center; }
+.sv { font-family: var(--display); font-size: 22px; font-weight: 700; }
+.sl { font-size: 10px; color: var(--txt3); margin-top: 3px; text-transform: uppercase; letter-spacing: .05em; }
+
+/* Pills */
+.pills { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 22px; margin-bottom: 24px; justify-content: center; }
+.pill { display: flex; align-items: center; gap: 6px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: 100px; padding: 7px 13px; font-size: 12px; font-weight: 500; }
+.pd { width: 7px; height: 7px; border-radius: 50%; }
+
+/* Price block */
+.pbox { margin: 0 22px 20px; background: linear-gradient(135deg,rgba(139,111,255,.13),rgba(0,212,180,.09)); border: 1px solid rgba(139,111,255,.28); border-radius: var(--r2); padding: 22px; text-align: center; position: relative; overflow: hidden; }
+.pbox::before { content:''; position: absolute; top:-30px; right:-30px; width:120px; height:120px; border-radius:50%; background:rgba(139,111,255,.1); }
+.pey { font-size: 11px; color: var(--txt3); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 6px; }
+.pamt { font-family: var(--display); font-size: 50px; font-weight: 700; color: var(--gold); line-height: 1; margin-bottom: 5px; }
+.pamt sup { font-size: 22px; vertical-align: super; }
+.pdesc { font-size: 12px; color: var(--txt2); margin-bottom: 16px; }
+.pfeats { display: flex; flex-direction: column; gap: 7px; margin-bottom: 20px; text-align: left; }
+.pf { display: flex; align-items: center; gap: 9px; font-size: 12px; color: var(--txt2); }
+.pfc { width: 18px; height: 18px; border-radius: 50%; background: rgba(60,220,140,.14); border: 1px solid rgba(60,220,140,.28); display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--green); flex-shrink: 0; }
+
+/* ═══════════ BUTTONS ═══════════ */
+.btn-gold { width: 100%; padding: 16px; font-family: var(--font); font-size: 15px; font-weight: 800; border: none; border-radius: var(--r); background: linear-gradient(135deg,var(--gold),var(--gold2)); color: #1a1200; cursor: pointer; transition: all .18s; letter-spacing: .01em; }
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(245,200,66,.35); }
+.btn-ghost { width: 100%; padding: 13px; font-size: 13px; font-weight: 500; background: transparent; color: var(--txt2); border: 1px solid var(--bdr2); border-radius: var(--r); cursor: pointer; transition: all .18s; margin-top: 10px; font-family: var(--font); }
+.btn-ghost:hover { background: var(--bg3); color: var(--txt); }
+.btn-purple { width: 100%; padding: 16px; font-size: 15px; font-weight: 700; border: none; border-radius: var(--r); background: linear-gradient(135deg,var(--purple),var(--purple2)); color: #fff; cursor: pointer; transition: all .18s; font-family: var(--font); }
+.btn-purple:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(139,111,255,.4); }
+.btn-purple:disabled { opacity: .35; cursor: not-allowed; transform: none !important; }
+.note { font-size: 10px; color: var(--txt3); text-align: center; margin-top: 12px; padding: 0 22px; line-height: 1.5; }
+
+/* ═══════════ PAYMENT SCREEN ═══════════ */
+.ph { padding: 22px 22px 0; text-align: center; }
+.ptitle { font-family: var(--display); font-size: 26px; font-weight: 700; margin-bottom: 6px; }
+.psub { font-size: 13px; color: var(--txt2); margin-bottom: 18px; }
+.sbadge { display: inline-flex; align-items: center; gap: 6px; background: rgba(60,220,140,.1); border: 1px solid rgba(60,220,140,.22); border-radius: 100px; padding: 5px 14px; font-size: 11px; font-weight: 700; color: var(--green); margin-bottom: 22px; }
+.ocard { margin: 0 22px 16px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r2); padding: 18px; }
+.orow { display: flex; justify-content: space-between; align-items: center; }
+.olbl { font-size: 13px; color: var(--txt2); }
+.oval { font-size: 17px; font-weight: 800; color: var(--gold); font-family: var(--display); }
+.odiv { height: 1px; background: var(--bdr); margin: 12px 0; }
+
+/* Culqi trust badges */
+.culqi-badges { display: flex; justify-content: center; gap: 12px; margin: 0 22px 20px; flex-wrap: wrap; }
+.cbadge { display: flex; align-items: center; gap: 5px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: 8px; padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--txt2); }
+
+/* Email input for Culqi */
+.email-section { padding: 0 22px; margin-bottom: 16px; }
+.flbl { font-size: 11px; font-weight: 700; color: var(--txt3); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 7px; display: block; }
+.finp { width: 100%; padding: 13px 15px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r); color: var(--txt); font-family: var(--font); font-size: 14px; outline: none; transition: border-color .18s; }
+.finp:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(0,212,180,.08); }
+.finp::placeholder { color: var(--txt3); }
+
+/* Culqi button area */
+.culqi-btn-wrap { padding: 0 22px 20px; }
+.culqi-info { display: flex; justify-content: center; gap: 16px; margin-top: 14px; }
+.culqi-info span { font-size: 10px; color: var(--txt3); }
+
+/* Payment methods icons */
+.pm-icons { display: flex; justify-content: center; gap: 10px; margin: 0 22px 20px; }
+.pm-icon-item { background: var(--bg3); border: 1px solid var(--bdr); border-radius: 8px; padding: 8px 14px; font-size: 11px; font-weight: 600; color: var(--txt2); display: flex; align-items: center; gap: 5px; }
+
+/* ═══════════ PROGRESS ═══════════ */
+.pgwrap { padding: 18px 22px 0; position: sticky; top: 0; z-index: 10; background: linear-gradient(180deg,var(--bg) 75%,transparent); padding-bottom: 12px; }
+.pgmeta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.pglbl { font-size: 11px; color: var(--txt3); }
+.pgdom { font-size: 10px; font-weight: 800; letter-spacing: .07em; padding: 3px 10px; border-radius: 20px; }
+.pgtrack { height: 5px; background: var(--bg4); border-radius: 3px; overflow: hidden; }
+.pgfill { height: 100%; border-radius: 3px; transition: width .5s cubic-bezier(.22,1,.36,1); background: linear-gradient(90deg,var(--purple),var(--teal)); }
+.tbar { height: 3px; background: var(--bg4); border-radius: 2px; overflow: hidden; margin-top: 5px; }
+.tfill { height: 100%; border-radius: 2px; transition: width 1s linear, background .3s; background: var(--teal); }
+.tfill.w { background: var(--gold); }
+.tfill.d { background: var(--coral); }
+
+/* ═══════════ QUESTION ═══════════ */
+.qb { padding: 16px 22px; }
+.qchip { display: inline-flex; align-items: center; gap: 6px; font-size: 10px; font-weight: 800; letter-spacing: .07em; padding: 4px 11px; border-radius: 20px; margin-bottom: 14px; }
+.qins { font-family: var(--display); font-size: 18px; font-weight: 600; line-height: 1.4; margin-bottom: 12px; letter-spacing: -.2px; }
+.qq { font-size: 20px; font-weight: 700; font-family: var(--display); color: var(--gold); background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r); padding: 16px 18px; margin-bottom: 18px; letter-spacing: -.2px; }
+.qhint { font-size: 11px; color: var(--txt3); font-style: italic; margin-top: 6px; }
+
+/* Matrix */
+.mwrap { display: flex; justify-content: center; margin: 10px 0 18px; }
+.mgrid { display: grid; gap: 5px; }
+.mcell { width: 72px; height: 72px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: 10px; display: flex; align-items: center; justify-content: center; }
+.mcell.emp { border: 2px dashed var(--bdr2); background: rgba(139,111,255,.05); font-size: 26px; color: var(--txt3); }
+.mcell svg { width: 44px; height: 44px; }
+
+/* Options */
+.ogrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.ob { background: var(--bg3); border: 1.5px solid var(--bdr); border-radius: var(--r); padding: 13px 14px; font-size: 13px; color: var(--txt); cursor: pointer; text-align: left; transition: all .16s; display: flex; align-items: center; gap: 10px; min-height: 54px; line-height: 1.35; font-family: var(--font); }
+.ob:hover { border-color: var(--bdr2); background: var(--bg4); transform: translateY(-1px); }
+.ob.sel { border-color: var(--teal); background: rgba(0,212,180,.08); color: var(--teal); }
+.ob.ok { border-color: var(--green); background: rgba(60,220,140,.1); color: var(--green); }
+.ob.no { border-color: var(--coral); background: rgba(255,107,107,.1); color: var(--coral); }
+.oltr { width: 24px; height: 24px; border-radius: 50%; background: var(--bg4); border: 1px solid var(--bdr2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; transition: all .16s; font-family: var(--mono); }
+.ob.sel .oltr { background: var(--teal); border-color: var(--teal); color: var(--bg); }
+.ob.ok .oltr { background: var(--green); border-color: var(--green); color: var(--bg); }
+.ob.no .oltr { background: var(--coral); border-color: var(--coral); color: #fff; }
+
+/* Matrix options */
+.omgrid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.omb { background: var(--bg3); border: 1.5px solid var(--bdr); border-radius: var(--r); padding: 12px; cursor: pointer; transition: all .16s; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.omb:hover { border-color: var(--bdr2); transform: translateY(-1px); }
+.omb.sel { border-color: var(--teal); background: rgba(0,212,180,.07); }
+.omb.ok { border-color: var(--green); background: rgba(60,220,140,.1); }
+.omb.no { border-color: var(--coral); background: rgba(255,107,107,.1); }
+.omb svg { width: 56px; height: 56px; }
+.omb span { font-size: 10px; color: var(--txt3); font-family: var(--mono); }
+
+/* Spatial */
+.shcmp { display: flex; align-items: center; gap: 14px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r); padding: 16px 18px; margin-bottom: 18px; }
+.shbox { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 72px; }
+.sharr { font-size: 24px; color: var(--txt3); flex-shrink: 0; }
+.shq { width: 72px; height: 72px; flex-shrink: 0; border: 2px dashed var(--bdr2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 24px; color: var(--txt3); }
+
+/* Memory */
+.sqwrap { display: flex; gap: 7px; justify-content: center; flex-wrap: wrap; margin: 16px 0; }
+.sqb { width: 52px; height: 52px; border-radius: 11px; background: var(--bg3); border: 1px solid var(--bdr); display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; color: var(--txt); transition: all .25s cubic-bezier(.34,1.56,.64,1); font-family: var(--mono); }
+.sqb.act { background: var(--purple); border-color: var(--purple); transform: scale(1.12); box-shadow: 0 6px 20px rgba(139,111,255,.5); color: #fff; }
+.sqb.hn { color: transparent; }
+.mstat { text-align: center; font-size: 13px; color: var(--txt3); margin: 8px 0; min-height: 22px; font-weight: 500; transition: color .3s; }
+.mresp { display: flex; gap: 7px; justify-content: center; min-height: 52px; margin-bottom: 12px; flex-wrap: wrap; }
+.mrc { width: 50px; height: 50px; border-radius: 10px; background: rgba(139,111,255,.14); border: 1.5px solid var(--purple); display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; color: var(--purple); animation: cpop .22s cubic-bezier(.34,1.56,.64,1); font-family: var(--mono); }
+@keyframes cpop { from{transform:scale(.4);opacity:0} to{transform:scale(1);opacity:1} }
+.mkpad { display: grid; grid-template-columns: repeat(5,1fr); gap: 7px; margin-bottom: 12px; }
+.mkey { height: 50px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: 10px; font-size: 17px; font-weight: 700; color: var(--txt); cursor: pointer; transition: all .14s; font-family: var(--mono); }
+.mkey:hover { background: var(--bg4); border-color: var(--bdr2); transform: scale(1.04); }
+.mclr { background: transparent; border: 1px solid var(--bdr); border-radius: 8px; padding: 7px 14px; font-size: 11px; color: var(--txt3); cursor: pointer; display: block; margin: 0 auto; transition: all .14s; font-family: var(--font); }
+.mclr:hover { border-color: var(--bdr2); color: var(--txt2); }
+
+/* ═══════════ RESULTS ═══════════ */
+.rh { padding: 28px 22px 0; text-align: center; }
+.iqring { position: relative; width: 170px; height: 170px; margin: 0 auto 18px; }
+.iqring svg { position: absolute; inset: 0; }
+.iqctr { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.iqnum { font-family: var(--display); font-size: 52px; font-weight: 700; line-height: 1; letter-spacing: -2px; }
+.iqsub { font-size: 12px; color: var(--txt3); font-weight: 500; margin-top: 3px; }
+.rcat { font-family: var(--display); font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.rdesc { font-size: 13px; color: var(--txt2); line-height: 1.65; margin-bottom: 24px; max-width: 360px; margin-left: auto; margin-right: auto; }
+
+/* Domain breakdown */
+.dcard { margin: 0 22px 14px; border-radius: var(--r2); overflow: hidden; border: 1px solid rgba(245,200,66,.2); }
+.dchead { background: linear-gradient(135deg,rgba(245,200,66,.12),rgba(139,111,255,.12)); padding: 16px; border-bottom: 1px solid rgba(255,255,255,.05); display: flex; align-items: center; gap: 10px; }
+.dchi { font-size: 24px; }
+.dcht { font-size: 15px; font-weight: 700; font-family: var(--display); }
+.dchs { font-size: 11px; color: var(--txt2); margin-top: 2px; }
+.dbody { background: var(--bg3); }
+.dr { padding: 13px 18px; border-bottom: 1px solid var(--bdr); display: flex; align-items: center; gap: 12px; }
+.dr:last-child { border-bottom: none; }
+.dri { font-size: 18px; flex-shrink: 0; }
+.drinf { flex: 1; }
+.drn { font-size: 12px; font-weight: 700; margin-bottom: 5px; }
+.drbw { height: 5px; background: var(--bg4); border-radius: 3px; overflow: hidden; margin-bottom: 3px; }
+.drb { height: 100%; border-radius: 3px; transition: width 1.2s cubic-bezier(.22,1,.36,1); }
+.drm { display: flex; justify-content: space-between; font-size: 10px; color: var(--txt3); }
+.drsn { font-size: 15px; font-weight: 700; flex-shrink: 0; font-family: var(--mono); }
+
+/* Narrative */
+.narc { margin: 0 22px 14px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r2); padding: 20px; }
+.narl { font-size: 10px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.narl::after { content: ''; flex: 1; height: 1px; background: rgba(0,212,180,.2); }
+.nart { font-size: 13px; color: var(--txt2); line-height: 1.75; }
+.nart strong { color: var(--txt); font-weight: 700; }
+.nart .hl { color: var(--gold); }
+
+/* Tips */
+.tsec { margin: 0 22px 14px; }
+.ttl { font-size: 11px; font-weight: 800; color: var(--txt3); letter-spacing: .07em; text-transform: uppercase; margin-bottom: 10px; }
+.tcard { background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r); padding: 13px 15px; margin-bottom: 9px; display: flex; gap: 11px; align-items: flex-start; }
+.tico { font-size: 17px; flex-shrink: 0; margin-top: 1px; }
+.titxt { font-size: 12px; color: var(--txt2); line-height: 1.55; }
+.titxt strong { color: var(--txt); }
+
+/* Bell curve */
+.bsec { margin: 0 22px 16px; background: var(--bg3); border: 1px solid var(--bdr); border-radius: var(--r2); padding: 18px; }
+.btl { font-size: 10px; color: var(--txt3); text-align: center; margin-bottom: 12px; letter-spacing: .06em; text-transform: uppercase; }
+#bcanv { width: 100%; display: block; }
+
+/* Results CTA */
+.rcta { padding: 0 22px 14px; display: flex; gap: 9px; }
+.btn-retry { flex: 1; padding: 14px; font-size: 13px; font-weight: 700; background: var(--bg3); border: 1px solid var(--bdr2); border-radius: var(--r); color: var(--txt2); cursor: pointer; transition: all .18s; font-family: var(--font); }
+.btn-retry:hover { background: var(--bg4); color: var(--txt); }
+.btn-share { flex: 2; padding: 14px; font-size: 13px; font-weight: 800; background: linear-gradient(135deg,var(--gold),var(--gold2)); border: none; border-radius: var(--r); color: #1a1200; cursor: pointer; transition: all .18s; font-family: var(--font); }
+.btn-share:hover { transform: translateY(-2px); box-shadow: 0 7px 22px rgba(245,200,66,.3); }
+.disc { margin: 0 22px 32px; background: var(--bg3); border-left: 3px solid var(--bdr2); border-radius: 0 var(--r) var(--r) 0; padding: 11px 14px; font-size: 10px; color: var(--txt3); line-height: 1.6; }
+
+/* Loading */
+.lsc { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 520px; padding: 40px; text-align: center; }
+.lring { width: 56px; height: 56px; border-radius: 50%; border: 3px solid var(--bg3); border-top-color: var(--teal); animation: spin .8s linear infinite; margin-bottom: 20px; }
+@keyframes spin { to{transform:rotate(360deg)} }
+.ltit { font-family: var(--display); font-size: 20px; font-weight: 700; margin-bottom: 7px; }
+.lsub { font-size: 13px; color: var(--txt3); }
+
+/* Toast */
+.toast { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--bg3); border: 1px solid var(--bdr2); border-radius: 100px; padding: 12px 24px; font-size: 13px; font-weight: 500; color: var(--txt); box-shadow: 0 16px 40px rgba(0,0,0,.5); transition: transform .3s cubic-bezier(.34,1.56,.64,1); z-index: 100; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+/* Error message */
+.error-msg { background: rgba(255,107,107,.1); border: 1px solid rgba(255,107,107,.3); border-radius: var(--r); padding: 10px 14px; font-size: 12px; color: var(--coral); margin: 0 22px 12px; display: none; text-align: center; }
+.error-msg.show { display: block; }
+</style>
+</head>
+<body>
+
+<!-- FONDO ANIMADO -->
+<div id="bg-layer">
+  <div class="bg-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
+</div>
+
+<div id="app">
+
+  <!-- ══ INTRO ══ -->
+  <div id="s-intro" class="scr on">
+    <div class="topbar">
+      <div class="logo"><span class="logo-g">Mind</span><span style="color:var(--txt)">IQ</span></div>
+      <div class="vtag">v2.0</div>
+    </div>
+    <div class="hero">
+      <div class="hbadge"><div class="bdot"></div>Test cognitivo certificado</div>
+      <h1 class="htitle"><span class="ht1">Descubre tu</span><span class="ht2">potencial IQ</span></h1>
+      <p class="hsub">Evaluación basada en Wechsler (WAIS/WISC) y Stanford-Binet. Analiza tus 4 dominios cognitivos con pruebas visuales interactivas.</p>
+    </div>
+    <div class="brain-wrap">
+      <div class="br br1"></div><div class="br br2"></div><div class="br br3"></div>
+      <div class="bcore">🧠</div>
+    </div>
+    <div class="stats">
+      <div class="scard"><div class="sv" style="color:var(--teal)">36</div><div class="sl">Preguntas</div></div>
+      <div class="scard"><div class="sv" style="color:var(--gold)">4</div><div class="sl">Dominios</div></div>
+      <div class="scard"><div class="sv" style="color:var(--purple)">~20</div><div class="sl">Minutos</div></div>
+    </div>
+    <div class="pills">
+      <div class="pill"><div class="pd" style="background:var(--purple)"></div>Razonamiento Lógico</div>
+      <div class="pill"><div class="pd" style="background:var(--teal)"></div>Memoria</div>
+      <div class="pill"><div class="pd" style="background:var(--gold)"></div>Verbal</div>
+      <div class="pill"><div class="pd" style="background:var(--coral)"></div>Espacial</div>
+    </div>
+    <div class="pbox">
+      <div class="pey">Acceso completo al test</div>
+      <div class="pamt"><sup>$</sup>2</div>
+      <div class="pdesc">Pago único · Resultado inmediato</div>
+      <div class="pfeats">
+        <div class="pf"><div class="pfc">✓</div>36 preguntas cognitivas con gráficos interactivos</div>
+        <div class="pf"><div class="pfc">✓</div>Reporte IQ personalizado con puntuación exacta</div>
+        <div class="pf"><div class="pfc">✓</div>Análisis por 4 dominios cognitivos con percentiles</div>
+        <div class="pf"><div class="pfc">✓</div>Explicación simple + tips de mejora personalizados</div>
+      </div>
+      <button class="btn-gold" onclick="startFreeTest()">Comenzar test gratis →</button>
+    </div>
+    <div class="note">El test es 100% gratis. Solo pagas S/ 8.00 para ver tu resultado al final.</div>
+  </div>
+
+  <!-- ══ PAGO CON CULQI ══ -->
+  <div id="s-payment" class="scr">
+    <div class="topbar">
+      <button onclick="go('intro')" style="background:none;border:1px solid var(--bdr);border-radius:8px;color:var(--txt2);font-size:12px;padding:5px 11px;cursor:pointer;font-family:var(--font)">← Volver</button>
+      <div class="logo"><span class="logo-g">Mind</span><span style="color:var(--txt)">IQ</span></div>
+      <div style="width:64px"></div>
+    </div>
+    <div class="ph">
+      <h2 class="ptitle">Acceso al test</h2>
+      <p class="psub">Completa el pago para desbloquear tu evaluación completa</p>
+      <div class="sbadge">🔒 Pago 100% seguro · SSL cifrado</div>
+    </div>
+
+    <div class="ocard">
+      <div class="orow">
+        <span class="olbl">MindIQ — Test Cognitivo Completo</span>
+        <span class="oval">S/ 8.00</span>
+      </div>
+      <div class="odiv"></div>
+      <div class="orow">
+        <span style="font-size:13px;font-weight:700;color:var(--txt)">Total a pagar</span>
+        <span style="font-size:22px;font-weight:800;color:var(--gold);font-family:var(--display)">S/ 8.00</span>
+      </div>
+      <p style="font-size:10px;color:var(--txt3);margin-top:8px;text-align:center">≈ USD $2.00 · Tipo de cambio: S/4.00</p>
+    </div>
+
+    <!-- Métodos de pago aceptados -->
+    <div class="pm-icons">
+      <div class="pm-icon-item">💳 Visa/MC</div>
+      <div class="pm-icon-item">💜 Yape</div>
+      <div class="pm-icon-item">📱 PagoEfectivo</div>
+    </div>
+
+    <!-- Email del usuario (Culqi lo necesita) -->
+    <div class="email-section">
+      <label class="flbl">Tu correo electrónico</label>
+      <input type="email" id="user-email" class="finp" placeholder="tucorreo@ejemplo.com" required>
+      <p style="font-size:10px;color:var(--txt3);margin-top:6px">Recibirás tu comprobante aquí</p>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-msg" id="pay-error">Revisa tu correo e intenta nuevamente.</div>
+
+    <!-- Botón que abre Culqi Checkout -->
+    <div class="culqi-btn-wrap">
+      <button class="btn-gold" id="btn-culqi-open" onclick="openCulqi()">
+        🔐 Pagar S/ 8.00 con Culqi →
+      </button>
+      <div class="culqi-info">
+        <span>🔐 Encriptado SSL</span>
+        <span>🛡️ PCI DSS</span>
+        <span>💸 Reembolso 7 días</span>
+        <span>🇵🇪 Culqi Perú</span>
+      </div>
+    </div>
+
+    <!-- Trust badges -->
+    <div class="culqi-badges">
+      <div class="cbadge">✓ Visa / Mastercard</div>
+      <div class="cbadge">✓ Amex / Diners</div>
+      <div class="cbadge">✓ Yape</div>
+    </div>
+  </div>
+
+  <!-- ══ PAYWALL — aparece al terminar el test ══ -->
+  <div id="s-paywall" class="scr">
+    <div class="topbar" style="padding-top:20px">
+      <div class="logo"><span class="logo-g">Mind</span><span style="color:var(--txt)">IQ</span></div>
+      <div class="vtag">Test completado</div>
+    </div>
+    <div style="padding:32px 22px 0;text-align:center">
+      <div style="font-size:52px;margin-bottom:16px">🧠</div>
+      <h2 style="font-family:var(--display);font-size:28px;font-weight:700;letter-spacing:-1px;margin-bottom:10px">¡Test completado!</h2>
+      <p style="font-size:15px;color:var(--txt2);line-height:1.65;margin-bottom:8px">Tu resultado está listo. Paga <strong style="color:var(--gold)">S/ 8.00</strong> para desbloquear:</p>
+    </div>
+    <div style="margin:20px 22px;background:linear-gradient(135deg,rgba(139,111,255,.13),rgba(0,212,180,.09));border:1px solid rgba(139,111,255,.28);border-radius:var(--r2);padding:22px">
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:22px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--txt2)">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(139,111,255,.2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🎯</div>
+          Tu <strong style="color:var(--txt)">puntuación IQ exacta</strong> con categoría (Promedio, Superior, etc.)
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--txt2)">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(0,212,180,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📊</div>
+          Análisis de tus <strong style="color:var(--txt)">4 dominios cognitivos</strong> con percentiles
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--txt2)">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(245,200,66,.15);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">💡</div>
+          Explicación en <strong style="color:var(--txt)">lenguaje simple</strong> + tips personalizados para mejorar
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px;color:var(--txt2)">
+          <div style="width:32px;height:32px;border-radius:50%;background:rgba(60,220,140,.12);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">📈</div>
+          Tu posición en la <strong style="color:var(--txt)">curva de distribución mundial</strong>
+        </div>
+      </div>
+      <div style="text-align:center;margin-bottom:16px">
+        <div style="font-size:11px;color:var(--txt3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Precio del reporte completo</div>
+        <div style="font-family:var(--display);font-size:48px;font-weight:700;color:var(--gold);line-height:1">S/ 8<sup style="font-size:22px">.00</sup></div>
+        <div style="font-size:12px;color:var(--txt3);margin-top:4px">≈ USD $2 · Pago único · Sin suscripción</div>
+      </div>
+      <div class="email-section" style="padding:0;margin-bottom:16px">
+        <label class="flbl">Tu correo (para tu comprobante)</label>
+        <input type="email" id="paywall-email" class="finp" placeholder="tucorreo@ejemplo.com">
+      </div>
+      <div class="error-msg" id="paywall-error">Ingresa un correo válido.</div>
+      <button class="btn-gold" onclick="paywallPay()">🔐 Pagar S/ 8.00 y ver mi resultado →</button>
+      <div style="display:flex;justify-content:center;gap:14px;margin-top:12px">
+        <span style="font-size:10px;color:var(--txt3)">🔐 SSL</span>
+        <span style="font-size:10px;color:var(--txt3)">🛡️ Culqi Perú</span>
+        <span style="font-size:10px;color:var(--txt3)">💳 Visa/MC/Yape</span>
+      </div>
+    </div>
+    <p style="text-align:center;font-size:11px;color:var(--txt3);padding:0 22px 24px;line-height:1.5">Test educativo, no reemplaza evaluación clínica profesional.</p>
+  </div>
+
+  <!-- ══ LOADING ══ -->
+  <div id="s-loading" class="scr">
+    <div class="lsc">
+      <div class="lring"></div>
+      <div class="ltit" id="ltit">Procesando pago...</div>
+      <div class="lsub" id="lsub">Verificando con Culqi</div>
+    </div>
+  </div>
+
+  <!-- ══ TEST ══ -->
+  <div id="s-test" class="scr">
+    <div class="pgwrap">
+      <div class="pgmeta">
+        <span class="pglbl" id="pgtxt">Pregunta 1 de 36</span>
+        <span class="pgdom" id="pgdom">Lógica</span>
+      </div>
+      <div class="pgtrack"><div class="pgfill" id="pgfill" style="width:0%"></div></div>
+      <div class="tbar"><div class="tfill" id="tfill" style="width:100%"></div></div>
+    </div>
+    <div class="qb" id="qa"></div>
+  </div>
+
+  <!-- ══ RESULTADOS ══ -->
+  <div id="s-results" class="scr">
+    <div class="topbar" style="padding-top:20px">
+      <div class="logo"><span class="logo-g">Mind</span><span style="color:var(--txt)">IQ</span></div>
+      <div class="vtag" style="color:var(--green);background:rgba(60,220,140,.12);border-color:rgba(60,220,140,.22)">Reporte completo</div>
+    </div>
+    <div class="rh">
+      <div class="iqring">
+        <svg viewBox="0 0 170 170">
+          <circle cx="85" cy="85" r="74" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="10"/>
+          <circle id="iqarc" cx="85" cy="85" r="74" fill="none" stroke="url(#ig)" stroke-width="10"
+            stroke-linecap="round" stroke-dasharray="465" stroke-dashoffset="465"
+            transform="rotate(-90 85 85)" style="transition:stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1)"/>
+          <defs><linearGradient id="ig" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#8b6fff"/><stop offset="100%" stop-color="#00d4b4"/>
+          </linearGradient></defs>
+        </svg>
+        <div class="iqctr">
+          <div class="iqnum" id="rnum" style="color:var(--teal)">—</div>
+          <div class="iqsub">IQ Estimado</div>
+        </div>
+      </div>
+      <div class="rcat" id="rcat">—</div>
+      <p class="rdesc" id="rdsc">—</p>
+    </div>
+    <div class="dcard">
+      <div class="dchead"><div class="dchi">📊</div><div><div class="dcht">Análisis por dominio</div><div class="dchs">Tus 4 capacidades cognitivas evaluadas</div></div></div>
+      <div class="dbody" id="rdoms"></div>
+    </div>
+    <div class="narc"><div class="narl">Tu análisis personalizado</div><div class="nart" id="rnar">—</div></div>
+    <div class="tsec"><div class="ttl">¿Cómo mejorar?</div><div id="rtips"></div></div>
+    <div class="bsec"><div class="btl">Tu posición en la distribución mundial (μ=100, σ=15)</div><canvas id="bcanv" height="100"></canvas></div>
+    <div class="rcta">
+      <button class="btn-retry" onclick="go('intro')">↺ Repetir</button>
+      <button class="btn-share" onclick="shareR()">Compartir resultado 🔗</button>
+    </div>
+    <div class="disc"><strong>Aviso:</strong> MindIQ es una evaluación educativa. No es diagnóstico clínico. Consulta a un neuropsicólogo para evaluación oficial.</div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   CONFIGURACIÓN CULQI
+   ─────────────────────────────────────────────────────
+   PASO 1: Reemplaza AQUÍ tu llave pública de Culqi
+   - Para pruebas: pk_test_XXXXXXXXXXXX (desde panel.culqi.com/integration)
+   - Para producción: pk_live_XXXXXXXXXXXX (desde panel.culqi.com)
+
+   PASO 2: El token generado debes enviarlo a tu BACKEND
+   para crear el cargo. Ver función handleToken() abajo.
+═══════════════════════════════════════════════════════ */
+
+const CULQI_CONFIG = {
+  publicKey: 'pk_test_XXXXXXXXXXXXXXXXXX', // ← REEMPLAZA con tu llave pública
+  amount: 800,       // S/ 8.00 (en céntimos)
+  currency: 'PEN',   // Soles peruanos
+  description: 'MindIQ — Test de Inteligencia Completo',
+  title: 'MindIQ',
+
+  // URL de tu backend para procesar el cargo
+  // Cuando despliegues, reemplaza esto con tu servidor real
+  backendUrl: 'https://TU-SERVIDOR.com/api/pago', // ← REEMPLAZA
+};
+
+/* ─────────────────────────────────────────────────────
+   INICIALIZAR CULQI
+   ───────────────────────────────────────────────────── */
+function initCulqi() {
+  if (typeof Culqi === 'undefined') {
+    console.error('Culqi no cargó. Verifica la conexión a internet.');
+    return;
+  }
+
+  Culqi.publicKey = CULQI_CONFIG.publicKey;
+
+  Culqi.settings({
+    title: CULQI_CONFIG.title,
+    currency: CULQI_CONFIG.currency,
+    description: CULQI_CONFIG.description,
+    amount: CULQI_CONFIG.amount,
+  });
+
+  Culqi.options({
+    lang: 'es',
+    installments: false,
+    paymentMethods: {
+      tarjeta: true,
+      yape: true,
+      billetera: false,
+      bancaMovil: false,
+      agente: false,
+      cuotealo: false,
+    },
+    style: {
+      logo: '',          // URL de tu logo aquí
+      bannerColor: '#8b6fff',
+      buttonBackground: '#f5c842',
+      buttonTextColor: '#1a1200',
+      buttonText: 'Pagar ahora',
+      linksColor: '#00d4b4',
+    }
+  });
+}
+
+/* ─────────────────────────────────────────────────────
+   ABRIR CHECKOUT CULQI
+   ───────────────────────────────────────────────────── */
+function paywallPay() {
+  const email = document.getElementById('paywall-email').value.trim();
+  const errEl = document.getElementById('paywall-error');
+  if (!email || !email.includes('@') || !email.includes('.')) {
+    errEl.classList.add('show'); return;
+  }
+  errEl.classList.remove('show');
+  window._userEmail = email;
+  if (typeof Culqi !== 'undefined' && CULQI_CONFIG.publicKey !== 'pk_test_XXXXXXXXXXXXXXXXXX') {
+    try { Culqi.open(); return; } catch(e) {}
+  }
+  simulatePayment();
+}
+
+function openCulqi() {
+  const email = document.getElementById('user-email') ? document.getElementById('user-email').value.trim() : '';
+  if (typeof Culqi !== 'undefined') { try { Culqi.open(); } catch(e) { simulatePayment(); } }
+  else simulatePayment();
+}
+
+/* ─────────────────────────────────────────────────────
+   CALLBACK DE CULQI (se ejecuta cuando el pago termina)
+   ───────────────────────────────────────────────────── */
+function culqi() {
+  if (Culqi.token) {
+    // ✅ Token creado exitosamente — enviar al backend
+    const token = Culqi.token;
+    console.log('Token Culqi creado:', token.id);
+    handleToken(token);
+  } else if (Culqi.order) {
+    // ✅ Pago con Yape/PagoEfectivo
+    console.log('Orden creada:', Culqi.order.id);
+    handleToken({ id: Culqi.order.id, type: 'order' });
+  } else if (Culqi.error) {
+    // ❌ Error en el pago
+    const msg = Culqi.error.user_message || 'Pago no completado';
+    console.error('Error Culqi:', Culqi.error);
+    const errEl = document.getElementById('pay-error');
+    errEl.textContent = msg;
+    errEl.classList.add('show');
+    showToast('❌ ' + msg);
+  }
+}
+
+/* ─────────────────────────────────────────────────────
+   PROCESAR TOKEN EN BACKEND
+   ───────────────────────────────────────────────────── */
+async function handleToken(token) {
+  go('loading');
+  document.getElementById('ltit').textContent = 'Verificando pago...';
+  document.getElementById('lsub').textContent = 'Procesando con Culqi';
+
+  /* ──────────────────────────────────────────────────
+     AQUÍ LLAMAS A TU BACKEND (Node.js, PHP, Python, etc.)
+     Tu backend recibe el token y hace el cargo con la API de Culqi.
+
+     Ejemplo de lo que hace tu backend:
+     POST https://api.culqi.com/v2/charges
+     Headers: { Authorization: 'Bearer sk_live_TU_LLAVE_PRIVADA' }
+     Body: {
+       amount: 800,
+       currency_code: 'PEN',
+       email: 'usuario@email.com',
+       source_id: token.id,
+       description: 'MindIQ Test'
+     }
+
+     NUNCA pongas tu llave privada en el frontend.
+  ────────────────────────────────────────────────── */
+
+  try {
+    /* PRODUCCIÓN: Descomentar cuando tengas backend:
+    const response = await fetch(CULQI_CONFIG.backendUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        token: token.id,
+        email: window._userEmail,
+        amount: CULQI_CONFIG.amount,
+      })
+    });
+    const result = await response.json();
+    if (!result.success) throw new Error(result.message);
+    */
+
+    // MODO DEMO: Simular éxito para pruebas
+    await new Promise(r => setTimeout(r, 1800));
+    onPaymentSuccess();
+
+  } catch (err) {
+    console.error('Error backend:', err);
+    go('payment');
+    const errEl = document.getElementById('pay-error');
+    errEl.textContent = 'Error procesando el pago. Intenta nuevamente.';
+    errEl.classList.add('show');
+  }
+}
+
+function onPaymentSuccess() {
+  go('loading');
+  document.getElementById('ltit').textContent = '¡Pago exitoso! 🎉';
+  document.getElementById('lsub').textContent = 'Calculando tu resultado...';
+  setTimeout(() => { buildR(); go('results'); }, 1800);
+}
+
+/* Simular pago para demos/pruebas locales */
+function simulatePayment() {
+  go('loading');
+  document.getElementById('ltit').textContent = 'Procesando pago...';
+  document.getElementById('lsub').textContent = 'Modo demo activo';
+  setTimeout(onPaymentSuccess, 2000);
+}
+
+function skipPayment() {
+  initTest(); go('test');
+}
+
+// Inicializar Culqi al cargar
+window.addEventListener('load', () => {
+  try { initCulqi(); } catch(e) { console.log('Culqi en modo offline'); }
+});
+
+/* ═══════════════════════════════════════════════════════
+   NAVEGACIÓN
+═══════════════════════════════════════════════════════ */
+function go(id) {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('on'));
+  const el = document.getElementById('s-' + id) || document.getElementById(id);
+  if (el) el.classList.add('on');
+  window.scrollTo(0, 0);
+}
+
+/* ═══════════════════════════════════════════════════════
+   DATOS DE DOMINIOS Y PREGUNTAS
+═══════════════════════════════════════════════════════ */
+const DM = {
+  logic:  { label:'Razonamiento Lógico', icon:'🔷', color:'#8b6fff', tip:'Practica Sudoku, ajedrez y puzzles de lógica diariamente.' },
+  memory: { label:'Memoria de Trabajo',  icon:'💡', color:'#00d4b4', tip:'Entrena con la app Dual N-Back y practica meditación mindfulness.' },
+  verbal: { label:'Comprensión Verbal',  icon:'📚', color:'#f5c842', tip:'Lee 20 min al día y aprende 5 palabras nuevas por semana.' },
+  spatial:{ label:'Proc. Espacial',      icon:'🔺', color:'#ff6b6b', tip:'Juega Tetris, resuelve puzzles 3D y practica origami.' }
+};
+const DOMS = ['logic','memory','verbal','spatial'];
+const TL = { logic:60, memory:0, verbal:45, spatial:55 };
+
+const QS = [
+  {id:'l1',dom:'logic',t:'matrix',ins:'Completa la matriz. ¿Qué figura va en el espacio vacío?',pat:'rot',cor:2,d:1},
+  {id:'l2',dom:'logic',t:'matrix',ins:'Observa el patrón y elige la pieza correcta.',pat:'dots',cor:3,d:2},
+  {id:'l3',dom:'logic',t:'txt',ins:'Completa la analogía:',q:'Círculo → Esfera ·· Cuadrado → ___',opts:['Triángulo','Pirámide','Cubo','Rectángulo'],cor:2,d:2},
+  {id:'l4',dom:'logic',t:'txt',ins:'¿Qué número continúa la serie?',q:'2 → 6 → 18 → 54 → ___',opts:['108','144','162','216'],cor:3,d:2},
+  {id:'l5',dom:'logic',t:'txt',ins:'Completa la analogía lógica:',q:'Médico → Hospital ·· Piloto → ___',opts:['Carretera','Avión','Aeropuerto','Cielo'],cor:2,d:1},
+  {id:'l6',dom:'logic',t:'txt',ins:'¿Cuál es el siguiente número?',q:'1 → 1 → 2 → 3 → 5 → 8 → ___',opts:['11','12','13','14'],cor:2,d:2},
+  {id:'l7',dom:'logic',t:'txt',ins:'Identifica la relación:',q:'Rojo → Manzana ·· Amarillo → ___',opts:['Noche','Plátano','Cielo','Mar'],cor:1,d:1},
+  {id:'l8',dom:'logic',t:'txt',ins:'Completa la serie:',q:'3 → 7 → 15 → 31 → 63 → ___',opts:['115','127','121','125'],cor:1,d:3},
+  {id:'l9',dom:'logic',t:'txt',ins:'Analogía conceptual:',q:'Libro → Biblioteca ·· Cuadro → ___',opts:['Pintor','Marco','Museo','Color'],cor:2,d:2},
+  {id:'l10',dom:'logic',t:'txt',ins:'¿Qué cierra el patrón?',q:'AB → BC → CD → DE → ___',opts:['EF','FG','EE','DF'],cor:0,d:2},
+  {id:'m1',dom:'memory',t:'dfwd',ins:'Memoriza y repite en el mismo orden.',seq:[4,7,2],d:1},
+  {id:'m2',dom:'memory',t:'dfwd',ins:'Memoriza y repite en el mismo orden.',seq:[6,1,9,3],d:2},
+  {id:'m3',dom:'memory',t:'dbwd',ins:'Memoriza. Luego repítela en orden INVERSO.',seq:[8,3,5],d:2},
+  {id:'m4',dom:'memory',t:'dfwd',ins:'Memoriza y repite en el mismo orden.',seq:[2,5,7,4,1],d:3},
+  {id:'m5',dom:'memory',t:'dbwd',ins:'Memoriza. Repite en orden INVERSO.',seq:[9,2,6,4],d:3},
+  {id:'m6',dom:'memory',t:'vseq',ins:'Observa los bloques iluminados. Tócalos en el mismo orden.',seq:[0,2,4,1],d:2},
+  {id:'m7',dom:'memory',t:'dfwd',ins:'Memoriza y repite en el mismo orden.',seq:[3,8,1,6,9,2],d:4},
+  {id:'m8',dom:'memory',t:'dbwd',ins:'Memoriza. Repite en orden INVERSO.',seq:[7,1,4,9,2],d:4},
+  {id:'m9',dom:'memory',t:'vseq',ins:'Memoriza la secuencia de bloques y repítela.',seq:[3,0,5,2,4],d:3},
+  {id:'v1',dom:'verbal',t:'txt',ins:'Significado más cercano a:',q:'"EFÍMERO"',opts:['Duradero','Pasajero','Profundo','Sólido'],cor:1,d:2},
+  {id:'v2',dom:'verbal',t:'txt',ins:'Antónimo de:',q:'"PROLÍFICO"',opts:['Abundante','Creativo','Estéril','Generoso'],cor:2,d:3},
+  {id:'v3',dom:'verbal',t:'txt',ins:'¿Cuál NO pertenece al grupo?',q:'Tigre · León · Leopardo · Delfín · Puma',opts:['Tigre','León','Delfín','Puma'],cor:2,d:1,hint:'Piensa en el hábitat'},
+  {id:'v4',dom:'verbal',t:'txt',ins:'Completa la analogía verbal:',q:'Escritor → Novela ·· Compositor → ___',opts:['Piano','Instrumento','Sinfonía','Teatro'],cor:2,d:2},
+  {id:'v5',dom:'verbal',t:'txt',ins:'¿Qué significa?',q:'"UBICUO"',opts:['Misterioso','Que está en todas partes','Antiguo','Diminuto'],cor:1,d:3},
+  {id:'v6',dom:'verbal',t:'txt',ins:'Relación causa-efecto:',q:'Hambre → Comer ·· Sueño → ___',opts:['Noche','Cama','Dormir','Descanso'],cor:2,d:1},
+  {id:'v7',dom:'verbal',t:'txt',ins:'¿Cuál NO pertenece?',q:'Violín · Flauta · Guitarra · Oboe · Clarinete',opts:['Violín','Flauta','Guitarra','Clarinete'],cor:2,d:2,hint:'Cuerdas vs viento'},
+  {id:'v8',dom:'verbal',t:'txt',ins:'Sinónimo de:',q:'"PERSPICAZ"',opts:['Torpe','Agudo','Confuso','Lento'],cor:1,d:2},
+  {id:'v9',dom:'verbal',t:'txt',ins:'Analogía científica:',q:'Ósmosis → Membrana ·· Digestión → ___',opts:['Vitaminas','Intestino','Saliva','Estómago'],cor:1,d:4},
+  {id:'e1',dom:'spatial',t:'rot',ins:'La figura se rota 90° a la derecha. ¿Cuál es el resultado?',sh:'L',cor:1,d:1},
+  {id:'e2',dom:'spatial',t:'rot',ins:'La figura se rota 180°. ¿Cuál es el resultado?',sh:'T',cor:2,d:2},
+  {id:'e3',dom:'spatial',t:'txt',ins:'¿Cuántos bloques tiene esta estructura 3D?',q:'Base 2×2, capa media 1×2, cima 1×1',opts:['7','8','9','10'],cor:1,d:2},
+  {id:'e4',dom:'spatial',t:'txt',ins:'Net de 6 cuadrados en cruz. ¿Qué figura 3D forma?',q:'Patrón en cruz con 6 caras cuadradas iguales',opts:['Cubo','Pirámide','Prisma rectangular','Esfera'],cor:0,d:3},
+  {id:'e5',dom:'spatial',t:'rot',ins:'La figura F se rota 90° a la izquierda. ¿Cuál es el resultado?',sh:'F',cor:0,d:3},
+  {id:'e6',dom:'spatial',t:'txt',ins:'Conteo de bloques:',q:'Escalera 3D: 1 + 2 + 3 bloques apilados',opts:['5','6','7','8'],cor:1,d:2},
+  {id:'e7',dom:'spatial',t:'mir',ins:'¿Cuál es el reflejo espejo de la flecha?',sh:'arr',cor:2,d:2},
+  {id:'e8',dom:'spatial',t:'sser',ins:'¿Qué figura continúa la rotación de 36°?',cor:1,d:3},
+];
+
+/* ═══════════════════════════════════════════════════════
+   ESTADO DEL TEST
+═══════════════════════════════════════════════════════ */
+let ST = { idx:0, ans:[], scores:{logic:0,memory:0,verbal:0,spatial:0}, max:{logic:0,memory:0,verbal:0,spatial:0}, mi:[], ans2:false, sel:null, timer:null, tl:0, tf:0 };
+
+function initTest() {
+  ST = { idx:0, ans:[], scores:{logic:0,memory:0,verbal:0,spatial:0}, max:{logic:0,memory:0,verbal:0,spatial:0}, mi:[], ans2:false, sel:null, timer:null, tl:0, tf:0 };
+  QS.forEach(q => ST.max[q.dom] += q.d);
+  renderQ();
+}
+
+/* ═══════════════════════════════════════════════════════
+   RENDER PREGUNTAS
+═══════════════════════════════════════════════════════ */
+function renderQ() {
+  clearInterval(ST.timer);
+  if (ST.idx >= QS.length) { calcResults(); return; }
+  const q = QS[ST.idx];
+  ST.sel = null; ST.ans2 = false; ST.mi = [];
+  const pct = Math.round((ST.idx / QS.length) * 100);
+  document.getElementById('pgfill').style.width = pct + '%';
+  document.getElementById('pgtxt').textContent = `Pregunta ${ST.idx+1} de ${QS.length}`;
+  const d = DM[q.dom];
+  const pd = document.getElementById('pgdom');
+  pd.textContent = d.label.split(' ')[0];
+  pd.style.cssText = `color:${d.color};background:${d.color}18;border-radius:20px;padding:3px 10px;border:1px solid ${d.color}30`;
+  document.getElementById('qa').innerHTML = buildQ(q);
+  const tl = TL[q.dom];
+  if (tl > 0) {
+    ST.tl = tl; ST.tf = tl;
+    document.getElementById('tfill').style.width = '100%';
+    ST.timer = setInterval(() => {
+      ST.tl--;
+      const tf = document.getElementById('tfill');
+      if (tf) { tf.style.width = ((ST.tl/ST.tf)*100)+'%'; tf.className = 'tfill' + (ST.tl<=10?' d':ST.tl<=20?' w':''); }
+      if (ST.tl <= 0) { clearInterval(ST.timer); if (!ST.ans2) { rec(-1,false); advance(); } }
+    }, 1000);
+  } else {
+    const tf = document.getElementById('tfill'); if (tf) tf.style.width='0%';
+  }
+  if (['dfwd','dbwd','vseq'].includes(q.t)) setTimeout(() => startMem(q), 500);
+}
+
+function buildQ(q) {
+  const d = DM[q.dom];
+  let h = `<div class="qchip" style="color:${d.color};background:${d.color}18;border:1px solid ${d.color}30">${d.icon} ${d.label}</div>`;
+  h += `<div class="qins">${q.ins}</div>`;
+  if (q.t==='matrix') h += buildMatrix(q) + buildMOpts(q);
+  else if (q.t==='txt') {
+    if (q.q) h += `<div class="qq">${q.q}</div>`;
+    if (q.hint) h += `<div class="qhint">💡 ${q.hint}</div>`;
+    h += buildOpts(q);
+  }
+  else if (['dfwd','dbwd','vseq'].includes(q.t)) h += buildMem(q);
+  else if (q.t==='rot'||q.t==='mir') h += buildRot(q) + buildSOpts(q);
+  else if (q.t==='sser') h += buildSSer() + buildSOpts(q);
+  if (!['dfwd','dbwd','vseq'].includes(q.t))
+    h += `<div style="margin-top:8px"><button class="btn-purple" id="bn" onclick="advance()" disabled>Siguiente →</button></div>`;
+  return h;
+}
+
+// Matrix
+function buildMatrix(q) {
+  let h = '<div class="mwrap"><div class="mgrid" style="grid-template-columns:repeat(3,72px)">';
+  for (let r=0;r<3;r++) for (let c=0;c<3;c++) {
+    if (r===2&&c===2) h += `<div class="mcell emp">?</div>`;
+    else h += `<div class="mcell">${mc(q.pat,r,c)}</div>`;
+  }
+  return h+'</div></div>';
+}
+function mc(pat,r,c) {
+  if (pat==='rot') { const s=['triangle','square','pentagon']; return shp(s[c%3],(r*60+c*60)%360,'#8b6fff'); }
+  if (pat==='dots') return dots(r*3+c+1);
+  return shp('circle',0,'#8b6fff');
+}
+function buildMOpts(q) {
+  const opts = q.pat==='rot'
+    ? [shp('pentagon',90,'#8b6fff'),shp('pentagon',120,'#8b6fff'),shp('pentagon',180,'#8b6fff'),shp('pentagon',60,'#8b6fff')]
+    : [dots(7),dots(8),dots(9),dots(6)];
+  let h = '<div class="omgrid">';
+  opts.forEach((s,i) => h += `<div class="omb" onclick="sel(${i})" id="op${i}">${s}<span>${String.fromCharCode(65+i)}</span></div>`);
+  return h+'</div>';
+}
+function shp(t,r,c) {
+  if (t==='triangle') return `<svg viewBox="0 0 48 48"><polygon transform="rotate(${r},24,24)" points="24,5 42,40 6,40" fill="${c}" fill-opacity=".85"/></svg>`;
+  if (t==='square') return `<svg viewBox="0 0 48 48"><rect transform="rotate(${r},24,24)" x="8" y="8" width="32" height="32" rx="3" fill="${c}" fill-opacity=".85"/></svg>`;
+  if (t==='pentagon') return `<svg viewBox="0 0 48 48"><polygon transform="rotate(${r},24,24)" points="24,4 43,17 36,40 12,40 5,17" fill="${c}" fill-opacity=".85"/></svg>`;
+  return `<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="18" fill="${c}" fill-opacity=".85"/></svg>`;
+}
+function dots(n) {
+  const g=[[],[],[],[],[],[],[],[],[]];
+  g[0]=[[24,24]];g[1]=[[14,24],[34,24]];g[2]=[[14,14],[34,14],[24,34]];
+  g[3]=[[14,14],[34,14],[14,34],[34,34]];g[4]=[[14,14],[34,14],[24,24],[14,34],[34,34]];
+  g[5]=[[14,12],[34,12],[14,24],[34,24],[14,36],[34,36]];
+  g[6]=[[14,10],[24,10],[34,10],[14,24],[34,24],[14,38],[34,38]];
+  g[7]=[[14,10],[24,10],[34,10],[14,24],[34,24],[14,38],[24,38],[34,38]];
+  g[8]=[[14,10],[24,10],[34,10],[14,24],[24,24],[34,24],[14,38],[24,38],[34,38]];
+  const pts = g[Math.min(n,9)-1]||g[0];
+  return `<svg viewBox="0 0 48 48">${pts.map(([x,y])=>`<circle cx="${x}" cy="${y}" r="5" fill="#8b6fff" fill-opacity=".85"/>`).join('')}</svg>`;
+}
+
+// Text options
+function buildOpts(q) {
+  let h = '<div class="ogrid">';
+  q.opts.forEach((o,i) => h += `<button class="ob" onclick="sel(${i})" id="op${i}"><span class="oltr">${String.fromCharCode(65+i)}</span>${o}</button>`);
+  return h+'</div>';
+}
+
+// Memory
+function buildMem(q) {
+  if (q.t==='vseq') {
+    let h = '<div class="sqwrap" id="sqw">';
+    for (let i=0;i<6;i++) h += `<div class="sqb" id="vb${i}">${i+1}</div>`;
+    h += '</div><div class="mstat" id="mst">Observa la secuencia...</div>';
+    return h;
+  }
+  let h = '<div class="sqwrap" id="sqw">';
+  q.seq.forEach((n,i) => h += `<div class="sqb hn" id="dg${i}">${n}</div>`);
+  h += '</div><div class="mstat" id="mst">Preparando...</div>';
+  h += '<div id="mia" style="display:none"><div class="mresp" id="mr"></div><div class="mkpad">';
+  for (let d=0;d<=9;d++) if (q.seq.includes(d)) h += `<button class="mkey" onclick="addD(${d})">${d}</button>`;
+  h += '</div><button class="mclr" onclick="clrM()">← Borrar</button></div>';
+  return h;
+}
+function startMem(q) { if (q.t==='vseq') showV(q,0); else showD(q,0); }
+function showD(q,i) {
+  if (i>=q.seq.length) { setTimeout(()=>{ const st=document.getElementById('mst'); if(st) st.textContent=q.t==='dbwd'?'↩ Escríbela al REVÉS':'↩ Escríbela en el mismo orden'; const ia=document.getElementById('mia'); if(ia) ia.style.display='block'; },500); return; }
+  const el=document.getElementById('dg'+i); if(el){el.classList.remove('hn');el.classList.add('act');}
+  setTimeout(()=>{ if(el){el.classList.remove('act');el.classList.add('hn');} setTimeout(()=>showD(q,i+1),200); },750);
+}
+function showV(q,i) {
+  if (i>=q.seq.length) { setTimeout(()=>{ const st=document.getElementById('mst'); if(st) st.textContent='↩ Toca los bloques en el mismo orden'; enableVI(q); },500); return; }
+  const el=document.getElementById('vb'+q.seq[i]); if(el) el.classList.add('act');
+  setTimeout(()=>{ if(el) el.classList.remove('act'); setTimeout(()=>showV(q,i+1),300); },650);
+}
+function enableVI(q) {
+  ST.mi=[];
+  document.querySelectorAll('.sqb').forEach((b,i) => {
+    b.style.cursor='pointer';
+    b.onclick=()=>{ ST.mi.push(i); b.classList.add('act'); setTimeout(()=>b.classList.remove('act'),300); if(ST.mi.length>=q.seq.length) setTimeout(()=>chkM(q),400); };
+  });
+}
+function addD(d) { const q=QS[ST.idx]; if(ST.mi.length>=q.seq.length) return; ST.mi.push(d); const r=document.getElementById('mr'); if(r) r.innerHTML+=`<div class="mrc">${d}</div>`; if(ST.mi.length>=q.seq.length) setTimeout(()=>chkM(q),400); }
+function clrM() { ST.mi=[]; const r=document.getElementById('mr'); if(r) r.innerHTML=''; }
+function chkM(q) {
+  const exp=q.t==='dbwd'?[...q.seq].reverse():q.seq;
+  const ok=JSON.stringify(ST.mi)===JSON.stringify(exp);
+  rec(ok?0:-1,ok);
+  const st=document.getElementById('mst');
+  if(st){st.textContent=ok?'✅ ¡Correcto!':'❌ La secuencia era: '+exp.join(' - ');st.style.color=ok?'var(--green)':'var(--coral)';}
+  setTimeout(()=>advance(),1300);
+}
+
+// Spatial
+function buildRot(q) {
+  let base='';
+  if(q.sh==='L') base=`<svg viewBox="0 0 56 56" style="width:70px;height:70px">${svgL()}</svg>`;
+  else if(q.sh==='T') base=`<svg viewBox="0 0 56 56" style="width:70px;height:70px">${svgT()}</svg>`;
+  else if(q.sh==='F') base=`<svg viewBox="0 0 56 56" style="width:70px;height:70px">${svgF()}</svg>`;
+  else base=`<svg viewBox="0 0 56 56" style="width:70px;height:70px"><polygon points="8,28 36,14 36,22 48,22 48,34 36,34 36,42" fill="#ff6b6b" fill-opacity=".85"/></svg>`;
+  return `<div class="shcmp"><div class="shbox">${base}</div><div class="sharr">→</div><div class="shq">?</div></div>`;
+}
+function buildSSer() {
+  const mk=r=>`<svg viewBox="0 0 46 46" style="width:44px;height:44px"><polygon transform="rotate(${r},23,23)" points="23,3 29,15 43,17 33,27 36,41 23,35 10,41 13,27 3,17 17,15" fill="#ff6b6b" fill-opacity=".85"/></svg>`;
+  return `<div class="shcmp" style="flex-wrap:wrap;gap:10px">${mk(0)}<span style="font-size:18px;color:var(--txt3);align-self:center">→</span>${mk(36)}<span style="font-size:18px;color:var(--txt3);align-self:center">→</span><div class="shq">?</div></div>`;
+}
+function buildSOpts(q) {
+  let opts;
+  if(q.t==='rot'){
+    if(q.sh==='L') opts=[0,90,180,270].map(r=>`<svg viewBox="0 0 56 56" style="width:56px;height:56px"><g transform="rotate(${r},28,28)">${svgL()}</g></svg>`);
+    else if(q.sh==='T') opts=[0,90,180,270].map(r=>`<svg viewBox="0 0 56 56" style="width:56px;height:56px"><g transform="rotate(${r},28,28)">${svgT()}</g></svg>`);
+    else opts=[270,90,0,180].map(r=>`<svg viewBox="0 0 56 56" style="width:56px;height:56px"><g transform="rotate(${r},28,28)">${svgF()}</g></svg>`);
+  } else if(q.t==='mir'){
+    opts=[
+      `<svg viewBox="0 0 56 56" style="width:56px;height:56px"><polygon points="8,28 36,14 36,22 48,22 48,34 36,34 36,42" fill="#ff6b6b" fill-opacity=".85"/></svg>`,
+      `<svg viewBox="0 0 56 56" style="width:56px;height:56px"><polygon transform="rotate(90,28,28)" points="8,28 36,14 36,22 48,22 48,34 36,34 36,42" fill="#ff6b6b" fill-opacity=".85"/></svg>`,
+      `<svg viewBox="0 0 56 56" style="width:56px;height:56px"><polygon points="48,28 20,14 20,22 8,22 8,34 20,34 20,42" fill="#ff6b6b" fill-opacity=".85"/></svg>`,
+      `<svg viewBox="0 0 56 56" style="width:56px;height:56px"><polygon transform="rotate(270,28,28)" points="8,28 36,14 36,22 48,22 48,34 36,34 36,42" fill="#ff6b6b" fill-opacity=".85"/></svg>`,
+    ];
+  } else {
+    opts=[36,72,108,0].map(r=>`<svg viewBox="0 0 46 46" style="width:56px;height:56px"><polygon transform="rotate(${r},23,23)" points="23,3 29,15 43,17 33,27 36,41 23,35 10,41 13,27 3,17 17,15" fill="#ff6b6b" fill-opacity=".85"/></svg>`);
+  }
+  let h='<div class="omgrid">'; opts.forEach((s,i)=>h+=`<div class="omb" onclick="sel(${i})" id="op${i}">${s}<span>${String.fromCharCode(65+i)}</span></div>`); return h+'</div>';
+}
+function svgL(){return`<rect x="15" y="8" width="10" height="32" rx="2" fill="#ff6b6b" fill-opacity=".85"/><rect x="15" y="30" width="26" height="10" rx="2" fill="#ff6b6b" fill-opacity=".85"/>`;}
+function svgT(){return`<rect x="8" y="10" width="40" height="10" rx="2" fill="#ff6b6b" fill-opacity=".85"/><rect x="23" y="10" width="10" height="36" rx="2" fill="#ff6b6b" fill-opacity=".85"/>`;}
+function svgF(){return`<rect x="13" y="8" width="10" height="40" rx="2" fill="#ff6b6b" fill-opacity=".85"/><rect x="13" y="8" width="30" height="9" rx="2" fill="#ff6b6b" fill-opacity=".85"/><rect x="13" y="22" width="22" height="9" rx="2" fill="#ff6b6b" fill-opacity=".85"/>`;}
+
+// Selección de opciones
+function sel(i) {
+  if(ST.ans2) return;
+  ST.sel=i;
+  document.querySelectorAll('.ob,.omb').forEach((b,j)=>{b.classList.remove('sel');if(j===i)b.classList.add('sel');});
+  const bn=document.getElementById('bn'); if(bn) bn.disabled=false;
+}
+function rec(s,ok) { if(ST.ans2) return; ST.ans2=true; if(ok) ST.scores[QS[ST.idx].dom]+=QS[ST.idx].d; ST.ans.push({dom:QS[ST.idx].dom,ok}); }
+function advance() {
+  clearInterval(ST.timer);
+  if(!ST.ans2){
+    if(ST.sel!==null){
+      const q=QS[ST.idx]; const ok=ST.sel===q.cor; rec(ST.sel,ok);
+      document.querySelectorAll('.ob,.omb').forEach((b,i)=>{b.classList.remove('sel');if(i===q.cor)b.classList.add('ok');else if(i===ST.sel&&!ok)b.classList.add('no');});
+      setTimeout(()=>{ST.idx++;renderQ();},700);
+    } else {rec(-1,false);ST.idx++;renderQ();}
+  } else {ST.idx++;renderQ();}
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESULTADOS
+═══════════════════════════════════════════════════════ */
+function calcResults() {
+  window._testDone = true;
+  go('paywall');
+}
+
+function startFreeTest() {
+  initTest(); go('test');
+}
+function buildR() {
+  const pcts={};
+  DOMS.forEach(d=>pcts[d]=ST.max[d]>0?Math.round((ST.scores[d]/ST.max[d])*100):0);
+  const w={logic:.30,memory:.25,verbal:.25,spatial:.20};
+  let ws=0; DOMS.forEach(d=>ws+=(pcts[d]/100)*w[d]);
+  const iq=Math.max(68,Math.min(145,60+Math.round(ws*88)));
+  const {cat,desc,col}=iqM(iq);
+  setTimeout(()=>{ const a=document.getElementById('iqarc'); if(a) a.style.strokeDashoffset=465-(465*Math.max(0,Math.min(1,(iq-60)/85))); },300);
+  document.getElementById('rnum').textContent=iq; document.getElementById('rnum').style.color=col;
+  document.getElementById('rcat').textContent=cat; document.getElementById('rcat').style.color=col;
+  document.getElementById('rdsc').textContent=desc;
+  document.getElementById('rdoms').innerHTML=DOMS.map(d=>{
+    const dm=DM[d];const p=pcts[d];
+    const lbl=p>=80?'Excelente':p>=60?'Bueno':p>=40?'Promedio':'Por mejorar';
+    return `<div class="dr"><div class="dri">${dm.icon}</div><div class="drinf"><div class="drn">${dm.label}</div><div class="drbw"><div class="drb" id="drb${d}" style="width:0%;background:${dm.color}"></div></div><div class="drm"><span>${lbl}</span><span>Percentil ~${p}</span></div></div><div class="drsn" style="color:${dm.color}">${p}</div></div>`;
+  }).join('');
+  setTimeout(()=>DOMS.forEach(d=>{const b=document.getElementById('drb'+d);if(b)b.style.width=pcts[d]+'%';}),200);
+  const best=DOMS.reduce((a,b)=>pcts[a]>pcts[b]?a:b);
+  const worst=DOMS.reduce((a,b)=>pcts[a]<pcts[b]?a:b);
+  document.getElementById('rnar').innerHTML=`Tu evaluación arroja un <strong class="hl">IQ estimado de ${iq}</strong>, categoría <strong>${cat}</strong>.<br><br>Tu mayor fortaleza es <strong>${DM[best].label}</strong> ${DM[best].icon}, con percentil <strong class="hl">${pcts[best]}</strong> — superaste al ${pcts[best]}% de los evaluados en esa área.<br><br>Tu mayor área de crecimiento es <strong>${DM[worst].label}</strong> ${DM[worst].icon} (percentil ${pcts[worst]}). Esto <strong>no es permanente</strong> — el cerebro mejora con práctica específica.<br><br>Recuerda: el IQ mide ciertos tipos de razonamiento bajo condiciones de prueba, no tu valor ni potencial de éxito.`;
+  const wk=[...DOMS].sort((a,b)=>pcts[a]-pcts[b]).slice(0,2);
+  document.getElementById('rtips').innerHTML=wk.map(d=>`<div class="tcard"><div class="tico">${DM[d].icon}</div><div class="titxt"><strong>${DM[d].label}:</strong> ${DM[d].tip}</div></div>`).join('');
+  setTimeout(()=>drawBell(iq),400);
+}
+function iqM(iq){
+  if(iq>=130) return{cat:'Muy Superior',desc:'Capacidad en el top 2% de la población. Razonamiento abstracto excepcional y aprendizaje muy acelerado.',col:'#00d4b4'};
+  if(iq>=120) return{cat:'Superior',desc:'Claramente por encima del promedio. Gran facilidad para resolver problemas complejos.',col:'#8b6fff'};
+  if(iq>=110) return{cat:'Alto Promedio',desc:'Por encima del promedio general. Procesas información con eficiencia y buenos recursos cognitivos.',col:'#f5c842'};
+  if(iq>=90) return{cat:'Promedio',desc:'Capacidad en el rango esperado (percentil 25-75). Buen equilibrio entre todos tus dominios.',col:'#3cdc8c'};
+  if(iq>=80) return{cat:'Bajo Promedio',desc:'Ligeramente por debajo del promedio. Con práctica constante puedes mejorar significativamente.',col:'#ff9f43'};
+  return{cat:'Limítrofe',desc:'Resultados en el rango bajo. Se recomienda evaluación presencial con un neuropsicólogo especializado.',col:'#ff6b6b'};
+}
+
+// Bell curve
+function drawBell(iq) {
+  const c=document.getElementById('bcanv'); if(!c) return;
+  const ctx=c.getContext('2d'); const dpr=window.devicePixelRatio||1;
+  c.width=(c.offsetWidth||400)*dpr; c.height=100*dpr; ctx.scale(dpr,dpr);
+  const W=c.offsetWidth||400,H=100,mn=100,sd=15,minX=55,maxX=145;
+  const nrm=x=>(1/(sd*Math.sqrt(2*Math.PI)))*Math.exp(-.5*Math.pow((x-mn)/sd,2));
+  const tx=x=>((x-minX)/(maxX-minX))*(W-48)+24; const my=nrm(mn); const ty=y=>H-15-(y/my)*(H-28);
+  ctx.beginPath();ctx.moveTo(tx(minX),H-15); for(let x=minX;x<=maxX;x+=.5)ctx.lineTo(tx(x),ty(nrm(x))); ctx.lineTo(tx(maxX),H-15);ctx.closePath();ctx.fillStyle='rgba(139,111,255,.07)';ctx.fill();
+  ctx.beginPath();ctx.moveTo(tx(minX),H-15); for(let x=minX;x<=iq;x+=.5)ctx.lineTo(tx(x),ty(nrm(x))); ctx.lineTo(tx(iq),H-15);ctx.closePath();ctx.fillStyle='rgba(0,212,180,.18)';ctx.fill();
+  ctx.beginPath();ctx.moveTo(tx(minX),ty(nrm(minX)));for(let x=minX;x<=maxX;x+=.5)ctx.lineTo(tx(x),ty(nrm(x)));ctx.strokeStyle='rgba(139,111,255,.55)';ctx.lineWidth=1.8;ctx.stroke();
+  const mx=tx(iq);ctx.beginPath();ctx.moveTo(mx,H-15);ctx.lineTo(mx,ty(nrm(iq)));ctx.strokeStyle='#00d4b4';ctx.lineWidth=2;ctx.setLineDash([4,3]);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#00d4b4';ctx.font=`bold 11px monospace`;ctx.textAlign='center';ctx.fillText('IQ '+iq,mx,ty(nrm(iq))-5);
+  ctx.fillStyle='rgba(255,255,255,.2)';ctx.font='10px sans-serif';[70,85,100,115,130].forEach(v=>{ctx.textAlign='center';ctx.fillText(v,tx(v),H-2);});
+  ctx.beginPath();ctx.moveTo(22,H-15);ctx.lineTo(W-22,H-15);ctx.strokeStyle='rgba(255,255,255,.08)';ctx.lineWidth=.5;ctx.stroke();
+}
+
+// Share
+function shareR() {
+  const iq=document.getElementById('rnum').textContent;
+  const cat=document.getElementById('rcat').textContent;
+  if(navigator.share) navigator.share({title:'Mi resultado MindIQ',text:`Obtuve IQ ${iq} (${cat}) en MindIQ. ¿Te animas a descubrir el tuyo?`,url:'https://mindiq.app'});
+  else { navigator.clipboard.writeText(`Mi IQ estimado es ${iq} (${cat}) — MindIQ`).catch(()=>{}); showToast('¡Resultado copiado al portapapeles!'); }
+}
+
+// Toast
+function showToast(msg) {
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
+}
+</script>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     GUÍA DE INTEGRACIÓN COMPLETA (comentarios para el desarrollador)
+═══════════════════════════════════════════════════════════════════
+
+PASO 1: CONFIGURAR CULQI
+========================
+1. Crea cuenta en https://culqi.com → "Crear cuenta"
+2. Completa verificación de identidad y datos bancarios peruanos
+3. Ve a CulqiPanel > Desarrollo > API Keys
+4. Copia tu llave PÚBLICA (pk_test_... para pruebas, pk_live_... para producción)
+5. Reemplaza 'pk_test_XXXXXXXXXXXXXXXXXX' en CULQI_CONFIG.publicKey arriba
+6. Guarda tu llave PRIVADA (sk_live_...) SOLO en tu servidor backend
+
+TARJETAS DE PRUEBA CULQI:
+- Visa aprobada: 4111111111111111, CVV: 123, Venc: 09/25
+- Mastercard: 5111111111111118, CVV: 123, Venc: 09/25
+- Rechazada: 4000000000000002
+
+PASO 2: CREAR BACKEND (Node.js ejemplo)
+========================================
+npm init -y
+npm install express culqi-node cors dotenv
+
+// server.js
+const express = require('express');
+const Culqi = require('culqi-node');
+const app = express();
+app.use(express.json());
+app.use(require('cors')());
+
+const culqi = new Culqi({ privateKey: process.env.CULQI_SECRET_KEY });
+
+app.post('/api/pago', async (req, res) => {
+  try {
+    const { token, email, amount } = req.body;
+    const charge = await culqi.charges.createCharge({
+      amount: amount,           // 800 = S/ 8.00
+      currency_code: 'PEN',
+      email: email,
+      source_id: token,
+      description: 'MindIQ Test de Inteligencia',
+      metadata: { user_email: email }
+    });
+    // Guardar en base de datos y dar acceso al test
+    res.json({ success: true, charge_id: charge.id });
+  } catch (err) {
+    res.status(400).json({ success: false, message: err.user_message || 'Error' });
+  }
+});
+
+app.listen(3000);
+
+PASO 3: PUBLICAR EN APP STORE (via React Native + Expo)
+========================================================
+La forma más simple de llevar este HTML a App Store es con Expo + WebView:
+
+1. INSTALAR EXPO:
+   npm install -g expo-cli
+   npx create-expo-app MindIQ
+   cd MindIQ
+   npx expo install react-native-webview
+
+2. MODIFICAR App.js:
+   import { WebView } from 'react-native-webview';
+   export default function App() {
+     return (
+       <WebView
+         source={{ uri: 'https://TU-DOMINIO.com/mindiq' }}  // tu HTML hosteado
+         style={{ flex: 1 }}
+         javaScriptEnabled={true}
+         domStorageEnabled={true}
+       />
+     );
+   }
+
+3. CONFIGURAR app.json:
+   {
+     "expo": {
+       "name": "MindIQ",
+       "slug": "mindiq",
+       "version": "1.0.0",
+       "ios": {
+         "bundleIdentifier": "com.tuempresa.mindiq",
+         "buildNumber": "1"
+       },
+       "android": {
+         "package": "com.tuempresa.mindiq"
+       }
+     }
+   }
+
+4. CREAR CUENTA APPLE DEVELOPER:
+   - Ve a https://developer.apple.com/programs/
+   - Costo: USD $99/año
+   - Tiempo de aprobación: 24-48 horas
+
+5. HACER BUILD Y SUBIR:
+   npm install -g eas-cli
+   eas login
+   eas build:configure
+   eas build --platform ios       # genera el .ipa
+   eas submit --platform ios      # sube a App Store Connect
+
+6. EN APP STORE CONNECT (https://appstoreconnect.apple.com):
+   - Llena descripción, screenshots, categoría (Educación)
+   - IMPORTANTE: Si cobras dentro de la app, Apple requiere usar
+     su sistema de In-App Purchases (se queda 30%)
+   - ALTERNATIVA: Cobrar en tu web antes de abrir la app (así evitas el 30%)
+
+IMPORTANTE SOBRE PAGOS EN APP STORE:
+- Apple NO permite usar Culqi/Stripe para cobros dentro de la app iOS
+- Si la app solo muestra contenido WEB y el pago pasa por el navegador
+  externo, podrías evitar las comisiones de Apple
+- La estrategia recomendada para empezar: publicar como PWA (web app)
+  en lugar de app nativa, así evitas el 30% de Apple y el proceso de revisión
+
+PUBLICAR COMO PWA (RECOMENDADO PARA EMPEZAR):
+=============================================
+1. Sube este HTML a Vercel (gratis): https://vercel.com
+2. Agrega un manifest.json para que se instale como app
+3. Los usuarios pueden "Añadir a pantalla de inicio" desde el navegador
+4. Sin comisión del 30% de Apple
+5. Sin proceso de revisión
+6. Funciona en iOS y Android
+
+═══════════════════════════════════════════════════════════════ -->
+</body>
+</html>
